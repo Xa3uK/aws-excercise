@@ -2,18 +2,15 @@ package com.example.awslambda.service;
 
 import com.example.awslambda.model.DataExample;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
@@ -70,6 +67,7 @@ public class DynamoDBService {
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().s()));
 
                 dataExample.setInputData(attributes);
+                log.info("getDataById: {}", dataExample);
                 return dataExample;
             }
         } catch (DynamoDbException e) {
@@ -98,6 +96,8 @@ public class DynamoDBService {
                 dataExample.setInputData(attributes);
                 dataExampleList.add(dataExample);
             }
+            dataExampleList.sort(Comparator.comparing(DataExample::getId));
+            log.info("getAllData: {}", dataExampleList);
             return dataExampleList;
 
         } catch (DynamoDbException e) {
