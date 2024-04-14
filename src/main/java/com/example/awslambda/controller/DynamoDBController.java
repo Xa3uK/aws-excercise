@@ -21,7 +21,7 @@ public class DynamoDBController {
     private final DynamoDBService dynamoDBService;
 
     @PostMapping
-    public void postDynamoDb(@RequestBody DataExample dataExample) {
+    public void createData(@RequestBody DataExample dataExample) {
 
         dataExample.getInputData().forEach((key, value) -> log.info("Key: {}, value: {}", key, value));
         dynamoDBService.insertData(dataExample);

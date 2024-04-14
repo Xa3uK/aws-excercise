@@ -5,6 +5,7 @@ import com.example.awslambda.processor.DataProcessor;
 import java.io.File;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -21,4 +22,7 @@ public class FileService {
         s3UploaderService.uploadFileToS3(file, bucket, file.getName());
     }
 
+    public ResponseEntity<String> getFileByName(String filename) {
+        return s3UploaderService.getFileFromS3(filename, bucket);
+    }
 }

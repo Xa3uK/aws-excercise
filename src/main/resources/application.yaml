@@ -6,8 +6,8 @@ aws:
   s3:
     access-key: ${AWS_ACCESS_KEY}
     secret-key: ${AWS_SECRET_KEY}
-    region: ${AWS_REGION}
     endpoint: ${AWS_S3_ENDPOINT}
     bucket: ${AWS_S3_BUCKET}}
+    region: ${AWS_REGION}
   dynamodb:
     table-name: ${AWS_DYNAMODB_TABLE_NAME}}
