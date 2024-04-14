@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class DataProcessor {
 
     public File processRequest(InputData inputData) {
@@ -17,13 +19,12 @@ public class DataProcessor {
         File file = new File(filePath);
 
         try (FileWriter writer = new FileWriter(file)) {
-            // Write the data to the file
             for (Map.Entry<String, String> entry : data.entrySet()) {
                 writer.write(entry.getKey() + ": " + entry.getValue() + "\n");
             }
-            System.out.println("File created successfully at: " + file.getAbsolutePath());
+            log.error("File created successfully at: {}", file.getAbsolutePath());
         } catch (IOException e) {
-            System.err.println("Failed to create file: " + e.getMessage());
+            log.error("Failed to create file: {}", e.getMessage());
         }
         return file;
     }
