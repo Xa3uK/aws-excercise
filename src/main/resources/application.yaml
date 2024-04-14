@@ -8,3 +8,4 @@ aws:
     secret-key: ${AWS_SECRET_KEY}
     region: ${AWS_REGION}
     endpoint: ${AWS_S3_ENDPOINT}
+    bucket: ${AWS_S3_BUCKET}}
