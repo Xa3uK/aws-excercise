@@ -13,16 +13,16 @@ import org.springframework.stereotype.Service;
 public class FileService {
 
     private final DataProcessor dataProcessor;
-    private final S3UploaderService s3UploaderService;
+    private final S3Service s3Service;
     @Value("${aws.s3.bucket}")
     private String bucket;
 
     public void processData(DataExample dataExample) {
         File file = dataProcessor.processRequest(dataExample);
-        s3UploaderService.uploadFileToS3(file, bucket, file.getName());
+        s3Service.uploadFileToS3(file, bucket, file.getName());
     }
 
     public ResponseEntity<String> getFileByName(String filename) {
-        return s3UploaderService.getFileFromS3(filename, bucket);
+        return s3Service.getFileFromS3(filename, bucket);
     }
 }

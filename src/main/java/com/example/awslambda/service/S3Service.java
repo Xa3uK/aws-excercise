@@ -1,8 +1,6 @@
 package com.example.awslambda.service;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +17,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class S3UploaderService {
+public class S3Service {
 
     private final S3Client s3Client;
 
