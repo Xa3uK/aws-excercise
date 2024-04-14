@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataProcessor {
 
-    public void processRequest(InputData inputData) {
+    public File processRequest(InputData inputData) {
         Map<String, String> data = inputData.getInputData();
 
         String filePath = "src/main/resources/output.txt";
@@ -25,6 +25,7 @@ public class DataProcessor {
         } catch (IOException e) {
             System.err.println("Failed to create file: " + e.getMessage());
         }
+        return file;
     }
 }
 
