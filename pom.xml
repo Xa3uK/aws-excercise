@@ -10,10 +10,10 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>com.example</groupId>
-  <artifactId>aws-lambda</artifactId>
+  <artifactId>aws-exercise</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>aws-lambda</name>
-  <description>aws-lambda</description>
+  <name>aws-exercise</name>
+  <description>aws-exercise</description>
   <properties>
     <java.version>17</java.version>
   </properties>
