@@ -1,6 +1,6 @@
 package com.example.awslambda.processor;
 
-import com.example.awslambda.model.InputData;
+import com.example.awslambda.model.DataExample;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DataProcessor {
 
-    public File processRequest(InputData inputData) {
-        Map<String, String> data = inputData.getInputData();
+    public File processRequest(DataExample dataExample) {
+        Map<String, String> data = dataExample.getInputData();
 
         String filePath = "src/main/resources/output.txt";
         File file = new File(filePath);

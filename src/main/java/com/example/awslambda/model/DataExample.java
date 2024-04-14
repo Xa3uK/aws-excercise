@@ -5,7 +5,7 @@ import java.util.Map;
 import lombok.Data;
 
 @Data
-public class InputData {
+public class DataExample {
 
     private String id;
 
