@@ -1,9 +1,13 @@
 package com.example.awslambda.service;
 
 import com.example.awslambda.model.DataExample;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,23 +19,20 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
+import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class DynamoDBService {
-
-    @Value("${aws.s3.access-key}")
-    private String accessKey;
-    @Value("${aws.s3.secret-key}")
-    private String secretKey;
 
     @Value("${aws.dynamodb.table-name}")
     private String tableName;
     private final String KEY = "id";
+    private final DynamoDbClient dynamoDbClient;
 
     public void insertData(DataExample dataExample) {
-
-        DynamoDbClient dynamoDb = getDynamoDbClient();
         Map<String, AttributeValue> itemValues = new HashMap<>();
         itemValues.put(KEY, AttributeValue.builder().s(dataExample.getId()).build());
 
@@ -43,11 +44,10 @@ public class DynamoDBService {
             .item(itemValues)
             .build();
 
-        dynamoDb.putItem(request);
+        dynamoDbClient.putItem(request);
     }
 
     public DataExample getDataById(String id) {
-        DynamoDbClient dynamoDb = getDynamoDbClient();
         HashMap<String, AttributeValue> keyToGet = new HashMap<>();
         keyToGet.put(KEY, AttributeValue.builder()
             .s(id)
@@ -59,7 +59,7 @@ public class DynamoDBService {
             .build();
 
         try {
-            Map<String, AttributeValue> returnedItem = dynamoDb.getItem(getItemRequest).item();
+            Map<String, AttributeValue> returnedItem = dynamoDbClient.getItem(getItemRequest).item();
             if (returnedItem.isEmpty()) {
                 log.error("No item found with the key {}", id);
             } else {
@@ -78,11 +78,31 @@ public class DynamoDBService {
         return null;
     }
 
-    private DynamoDbClient getDynamoDbClient() {
-        return DynamoDbClient.builder()
-            .region(Region.EU_CENTRAL_1)
-            .credentialsProvider(StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(accessKey, secretKey)))
-            .build();
+    public List<DataExample> getAllData() {
+        try {
+            ScanRequest scanRequest = ScanRequest.builder()
+                .tableName(tableName)
+                .build();
+
+            ScanResponse response = dynamoDbClient.scan(scanRequest);
+            List<DataExample> dataExampleList = new ArrayList<>();
+            for (Map<String, AttributeValue> item : response.items()) {
+                DataExample dataExample = new DataExample();
+                String id = item.get(KEY).s();
+                dataExample.setId(id);
+
+                Map<String, String> attributes = item.entrySet().stream()
+                    .filter(entry -> !entry.getKey().equals(KEY))
+                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().s()));
+
+                dataExample.setInputData(attributes);
+                dataExampleList.add(dataExample);
+            }
+            return dataExampleList;
+
+        } catch (DynamoDbException e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 }

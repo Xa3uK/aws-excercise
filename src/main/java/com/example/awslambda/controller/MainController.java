@@ -36,7 +36,7 @@ public class MainController {
     }
 
     @GetMapping("/dynamodb/{id}")
-    public ResponseEntity<DataExample> getById(@PathVariable String id) {
+    public ResponseEntity<DataExample> getDataById(@PathVariable String id) {
         DataExample dataExample = dynamoDBService.getDataById(id);
 
         if (dataExample != null) {
@@ -44,6 +44,11 @@ public class MainController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/dynamodb")
+    public List<DataExample> getAllData(){
+        return dynamoDBService.getAllData();
     }
 
 }
