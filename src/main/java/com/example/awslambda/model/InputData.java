@@ -7,6 +7,8 @@ import lombok.Data;
 @Data
 public class InputData {
 
+    private String id;
+
     @JsonProperty("input_data")
-    Map<String, String> inputData;
+    private Map<String, String> inputData;
 }
