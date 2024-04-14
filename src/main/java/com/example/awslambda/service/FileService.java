@@ -19,7 +19,7 @@ public class FileService {
 
     public void processData(DataExample dataExample) {
         File file = dataProcessor.processRequest(dataExample);
-        s3Service.uploadFileToS3(file, bucket, file.getName());
+        s3Service.uploadFile(file, bucket, file.getName());
     }
 
     public ResponseEntity<String> getFileByName(String filename) {

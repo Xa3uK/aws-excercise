@@ -21,7 +21,7 @@ public class S3Service {
 
     private final S3Client s3Client;
 
-    public void uploadFileToS3(File file, String bucketName, String keyName) {
+    public void uploadFile(File file, String bucketName, String keyName) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
             .bucket(bucketName).key(keyName).build();
 
