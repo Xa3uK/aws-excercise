@@ -42,7 +42,7 @@ public class S3Service {
         } catch (S3Exception e) {
             if (e.statusCode() == 404) {
                 log.error("File with name {} not found", filename);
-                return  ResponseEntity.status(HttpStatusCode.NOT_FOUND).body("File not found");
+                return ResponseEntity.status(HttpStatusCode.NOT_FOUND).body("File not found");
             } else {
                 log.error("Error retrieving file from S3: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatusCode.BAD_REQUEST).body("Error retrieving file from S3");

@@ -16,10 +16,6 @@ public class AppConfig {
     private String accessKey;
     @Value("${aws.s3.secret-key}")
     private String secretKey;
-    @Value("${aws.s3.endpoint}")
-    private String s3endpoint;
-    @Value("${aws.s3.region}")
-    private String s3region;
 
     @Bean
     public DynamoDbClient dynamoDbClient() {

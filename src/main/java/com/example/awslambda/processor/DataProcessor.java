@@ -22,7 +22,7 @@ public class DataProcessor {
             for (Map.Entry<String, String> entry : data.entrySet()) {
                 writer.write(entry.getKey() + ": " + entry.getValue() + "\n");
             }
-            log.error("File created successfully at: {}", file.getAbsolutePath());
+            log.info("File created successfully at: {}", file.getAbsolutePath());
         } catch (IOException e) {
             log.error("Failed to create file: {}", e.getMessage());
         }
