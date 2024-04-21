@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import software.amazon.awssdk.http.HttpStatusCode;
 
 @RequiredArgsConstructor
 @RestController
@@ -32,7 +33,7 @@ public class DynamoDBController {
         DataExample dataExample = dynamoDBService.getDataById(id);
 
         if (dataExample != null) {
-            return ResponseEntity.ok(dataExample);
+            return ResponseEntity.status(HttpStatusCode.CREATED).body(dataExample);
         } else {
             return ResponseEntity.notFound().build();
         }
