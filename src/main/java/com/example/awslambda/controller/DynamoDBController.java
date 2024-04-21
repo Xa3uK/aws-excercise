@@ -38,6 +38,7 @@ public class DynamoDBController {
         }
     }
 
+    //just add some changes
     @GetMapping
     public List<DataExample> getAllData(){
         return dynamoDBService.getAllData();
