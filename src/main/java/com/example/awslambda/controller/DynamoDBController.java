@@ -26,7 +26,7 @@ public class DynamoDBController {
         dataExample.getInputData().forEach((key, value) -> log.info("Key: {}, value: {}", key, value));
         dynamoDBService.insertData(dataExample);
     }
-
+//temp
     @GetMapping("{id}")
     public ResponseEntity<DataExample> getDataById(@PathVariable String id) {
         DataExample dataExample = dynamoDBService.getDataById(id);
