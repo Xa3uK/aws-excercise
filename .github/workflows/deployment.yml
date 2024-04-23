@@ -24,7 +24,7 @@ jobs:
         run: mvn -B package --file pom.xml
 
       - name: Build and push Docker image to ECR
-        uses: actions/aws/cli@v2:latest
+        uses: imehedi/actions-awscli-v2@latest
         with:
           args: ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
       - run: docker build -t ${{ secrets.AWS_ECR_REPO_NAME }} .
