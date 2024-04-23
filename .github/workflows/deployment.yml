@@ -4,10 +4,13 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    types:
+      - closed
 
 jobs:
-  Build:
-    name: Build
+  build:
+    name: Build and deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
