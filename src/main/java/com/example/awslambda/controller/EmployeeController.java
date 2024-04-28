@@ -1,6 +1,6 @@
 package com.example.awslambda.controller;
 
-import com.example.awslambda.model.DataExample;
+import com.example.awslambda.model.Employee;
 import com.example.awslambda.service.DynamoDBService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,32 +15,32 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/dynamodb")
+@RequestMapping("/employee")
 @Slf4j
-public class DynamoDBController {
+public class EmployeeController {
     private final DynamoDBService dynamoDBService;
 
     @PostMapping
-    public void createData(@RequestBody DataExample dataExample) {
+    public ResponseEntity<Employee> createData(@RequestBody Employee employee) {
 
-        dataExample.getInputData().forEach((key, value) -> log.info("Key: {}, value: {}", key, value));
-        dynamoDBService.insertData(dataExample);
+        employee.getProfile().forEach((key, value) -> log.info("Key: {}, value: {}", key, value));
+      return ResponseEntity.ok(dynamoDBService.createEmployee(employee));
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<DataExample> getDataById(@PathVariable String id) {
-        DataExample dataExample = dynamoDBService.getDataById(id);
+    public ResponseEntity<Employee> getDataById(@PathVariable String id) {
+        Employee employee = dynamoDBService.getEmployeeById(id);
 
-        if (dataExample != null) {
-            return ResponseEntity.ok(dataExample);
+        if (employee != null) {
+            return ResponseEntity.ok(employee);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping
-    public List<DataExample> getAllData(){
-        return dynamoDBService.getAllData();
+    public List<Employee> getAllData(){
+        return dynamoDBService.getAllEmployee();
     }
 
 }

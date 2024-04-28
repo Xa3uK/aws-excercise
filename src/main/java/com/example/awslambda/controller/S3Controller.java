@@ -1,6 +1,6 @@
 package com.example.awslambda.controller;
 
-import com.example.awslambda.model.DataExample;
+import com.example.awslambda.model.Employee;
 import com.example.awslambda.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +21,10 @@ public class S3Controller {
     private final FileService fileService;
 
     @PostMapping()
-    public void createFileInS3(@RequestBody DataExample dataExample) {
+    public void createFileInS3(@RequestBody Employee employee) {
 
-        dataExample.getInputData().forEach((key, value) -> log.info("Key: {}, value: {}", key, value));
-        fileService.processData(dataExample);
+        employee.getProfile().forEach((key, value) -> log.info("Key: {}, value: {}", key, value));
+        fileService.processData(employee);
     }
 
     @GetMapping

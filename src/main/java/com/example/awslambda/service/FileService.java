@@ -1,6 +1,6 @@
 package com.example.awslambda.service;
 
-import com.example.awslambda.model.DataExample;
+import com.example.awslambda.model.Employee;
 import com.example.awslambda.processor.DataProcessor;
 import java.io.File;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +17,8 @@ public class FileService {
     @Value("${aws.s3.bucket}")
     private String bucket;
 
-    public void processData(DataExample dataExample) {
-        File file = dataProcessor.processRequest(dataExample);
+    public void processData(Employee employee) {
+        File file = dataProcessor.processRequest(employee);
         s3Service.uploadFile(file, bucket, file.getName());
     }
 
