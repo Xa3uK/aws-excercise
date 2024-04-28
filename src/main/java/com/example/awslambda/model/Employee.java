@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Employee {
 
-    private String id;
+    private Long id;
 
     private Map<String, String> profile;
 }

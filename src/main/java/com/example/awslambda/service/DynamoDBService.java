@@ -51,7 +51,7 @@ public class DynamoDBService {
             .build();
 
         dynamoDbClient.putItem(request);
-        employee.setId(employeeId);
+        employee.setId(Long.parseLong(employeeId));
         return employee;
     }
 
@@ -72,7 +72,7 @@ public class DynamoDBService {
                 log.error("No item found with the key {}", id);
             } else {
                 Employee employee = new Employee();
-                employee.setId(id);
+                employee.setId(Long.parseLong(id));
                 Map<String, String> attributes = returnedItem.entrySet().stream()
                     .filter(entry -> !entry.getKey().equals("id"))
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().s()));
@@ -98,7 +98,7 @@ public class DynamoDBService {
             for (Map<String, AttributeValue> item : response.items()) {
                 Employee employee = new Employee();
                 String id = item.get(KEY).n();
-                employee.setId(id);
+                employee.setId(Long.parseLong(id));
 
                 Map<String, String> attributes = item.entrySet().stream()
                     .filter(entry -> !entry.getKey().equals(KEY))
