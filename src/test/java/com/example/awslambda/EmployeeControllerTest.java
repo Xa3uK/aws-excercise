@@ -19,7 +19,7 @@ public class EmployeeControllerTest {
         when(dynamoDBService.getEmployeeById("1")).thenReturn(new Employee("3", Map.of("name", "Alberto")));
         EmployeeController controller = new EmployeeController(dynamoDBService);
 
-        ResponseEntity<Employee> responseEntity = controller.getDataById("1");
+        ResponseEntity<Employee> responseEntity = controller.getEmployeeById("1");
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertNotNull(responseEntity.getBody());
@@ -31,7 +31,7 @@ public class EmployeeControllerTest {
         when(dynamoDBService.getEmployeeById("2")).thenReturn(null);
         EmployeeController controller = new EmployeeController(dynamoDBService);
 
-        ResponseEntity<Employee> responseEntity = controller.getDataById("2");
+        ResponseEntity<Employee> responseEntity = controller.getEmployeeById("2");
 
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertNull(responseEntity.getBody());

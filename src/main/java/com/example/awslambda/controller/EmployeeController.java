@@ -28,7 +28,7 @@ public class EmployeeController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Employee> getDataById(@PathVariable String id) {
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable String id) {
         Employee employee = dynamoDBService.getEmployeeById(id);
 
         if (employee != null) {
@@ -39,7 +39,7 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public List<Employee> getAllData(){
+    public List<Employee> getAllEmployee(){
         return dynamoDBService.getAllEmployee();
     }
 
