@@ -16,7 +16,7 @@ public class EmployeeControllerTest {
     @Test
     public void testGetDataById_WithDataExampleExists() {
         DynamoDBService dynamoDBService = mock(DynamoDBService.class);
-        when(dynamoDBService.getEmployeeById("1")).thenReturn(new Employee("3", Map.of("name", "Alberto")));
+        when(dynamoDBService.getEmployeeById("1")).thenReturn(new Employee(3L, Map.of("name", "Alberto")));
         EmployeeController controller = new EmployeeController(dynamoDBService);
 
         ResponseEntity<Employee> responseEntity = controller.getEmployeeById("1");
