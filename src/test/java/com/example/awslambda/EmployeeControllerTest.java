@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 public class EmployeeControllerTest {
 
     @Test
-    public void testGetDataById_WithDataExampleExists() {
+    public void testGetEmployeeById_WithEmployeeExists() {
         DynamoDBService dynamoDBService = mock(DynamoDBService.class);
         when(dynamoDBService.getEmployeeById("1")).thenReturn(new Employee(3L, Map.of("name", "Alberto")));
         EmployeeController controller = new EmployeeController(dynamoDBService);
@@ -26,7 +26,7 @@ public class EmployeeControllerTest {
     }
 
     @Test
-    public void testGetDataById_WithDataExampleNotFound() {
+    public void testGetEmployeeById_WithEmployeeNotFound() {
         DynamoDBService dynamoDBService = mock(DynamoDBService.class);
         when(dynamoDBService.getEmployeeById("2")).thenReturn(null);
         EmployeeController controller = new EmployeeController(dynamoDBService);
