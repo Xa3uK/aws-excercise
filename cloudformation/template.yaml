@@ -1,0 +1,101 @@
+#sam validate, sam build, sam deploy --guided, sam deploy
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  DynamoDBEmployeeTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: employees
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: N
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  SNSTopicEmployeeCreated:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: EmployeeCreated
+      Subscription:
+        - Protocol: email
+          Endpoint: hazardsales@gmail.com
+
+  IdGeneratorLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: IdGeneratorLambda
+      CodeUri: lambdas/
+      Handler: idGeneratorLambda.lambda_handler
+      Runtime: python3.12
+      Timeout: 10
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:Scan
+              Resource: !GetAtt DynamoDBEmployeeTable.Arn
+
+  EmployeeCreatedLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: EmployeeCreatedLambda
+      Role: !GetAtt LambdaExecutionRole.Arn
+      CodeUri: lambdas/
+      Handler: employeeCreatedLambda.lambda_handler
+      Runtime: python3.12
+      Timeout: 10
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref SNSTopicEmployeeCreated
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeStream
+                  - dynamodb:GetRecords
+                  - dynamodb:GetShardIterator
+                  - dynamodb:ListStreams
+                Resource: !GetAtt DynamoDBEmployeeTable.StreamArn
+
+  EventSourceDDBTableStream:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 1
+      Enabled: True
+      EventSourceArn: !GetAtt DynamoDBEmployeeTable.StreamArn
+      FunctionName: !GetAtt EmployeeCreatedLambdaFunction.Arn
+      StartingPosition: LATEST
+
+
+
