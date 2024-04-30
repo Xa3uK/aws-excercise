@@ -4,6 +4,58 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: aws-training
+
+  ECSEmployeeCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: EmployeeCluster
+
+  EmployeeServiceTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: EmployeeServiceTaskDef
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: '1024'
+      Memory: '2048'
+      ExecutionRoleArn: !GetAtt ecsTaskExecutionRole.Arn
+      NetworkMode: awsvpc
+      RuntimePlatform:
+        CpuArchitecture: ARM64
+        OperatingSystemFamily: LINUX
+      ContainerDefinitions:
+        - Name: aws-train-container
+          Image: 992382636162.dkr.ecr.eu-central-1.amazonaws.com/aws-training:latest
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+          Essential: true
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-create-group: 'true'
+              awslogs-group: '/ecs/EmployeeServiceTaskDefinition'
+              awslogs-region: 'eu-central-1'
+              awslogs-stream-prefix: 'ecs'
+          Secrets:
+            - Name: AWS_ACCESS_KEY
+              ValueFrom: "arn:aws:ssm:eu-central-1:992382636162:parameter/employeeapp/access_key"
+            - Name: AWS_SECRET_KEY
+              ValueFrom: "arn:aws:ssm:eu-central-1:992382636162:parameter/employeeapp/secret_key"
+          Environment:
+            - Name: AWS_DYNAMODB_TABLE_NAME
+              Value: !Ref DynamoDBEmployeeTable
+            - Name: AWS_REGION
+              Value: "eu-central-1"
+            - Name: AWS_S3_BUCKET
+              Value: !Ref EmployeeS3Bucket
+            - Name: AWS_S3_ENDPOINT
+              Value: !GetAtt EmployeeS3Bucket.DomainName
+
   DynamoDBEmployeeTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -19,6 +71,18 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
+
+  EmployeeS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: employee-files-bucket
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Suspended
 
   SNSTopicEmployeeCreated:
     Type: AWS::SNS::Topic
@@ -51,6 +115,39 @@ Resources:
       Handler: employeeCreatedLambda.lambda_handler
       Runtime: python3.12
       Timeout: 10
+
+  ecsTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+        - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      Policies:
+        - PolicyName: ecsTaskExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameters
+                Resource: "arn:aws:ssm:eu-central-1:992382636162:parameter/**"
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -96,6 +193,3 @@ Resources:
       EventSourceArn: !GetAtt DynamoDBEmployeeTable.StreamArn
       FunctionName: !GetAtt EmployeeCreatedLambdaFunction.Arn
       StartingPosition: LATEST
-
-
-
