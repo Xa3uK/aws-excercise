@@ -54,7 +54,7 @@ Resources:
             - Name: AWS_S3_BUCKET
               Value: !Ref EmployeeS3Bucket
             - Name: AWS_S3_ENDPOINT
-              Value: !GetAtt EmployeeS3Bucket.DomainName
+              Value: "https://s3.eu-central-1.amazonaws.com"
 
   DynamoDBEmployeeTable:
     Type: AWS::DynamoDB::Table
