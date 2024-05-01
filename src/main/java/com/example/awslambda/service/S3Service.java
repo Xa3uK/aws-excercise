@@ -1,6 +1,7 @@
 package com.example.awslambda.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
@@ -35,7 +36,7 @@ public class S3Service {
     }
 
     @SneakyThrows
-    public ResponseEntity<byte[]> downloadFile(String fileName) {
+    public ResponseEntity<?> downloadFile(String fileName) {
         try {
             S3Object s3Object = s3Client.getObject(bucketName, fileName);
             byte[] content = s3Object.getObjectContent().readAllBytes();
@@ -52,9 +53,13 @@ public class S3Service {
             headers.setContentDispositionFormData(fileName, fileName);
 
             return new ResponseEntity<>(content, headers, HttpStatus.OK);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (AmazonS3Exception e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("File '%s' not found", fileName));
+            } else {
+                e.printStackTrace();
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
     }
 }

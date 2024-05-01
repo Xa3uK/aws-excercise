@@ -27,7 +27,7 @@ public class FileController {
     }
 
     @GetMapping
-    public ResponseEntity<byte[]> getFile(@RequestParam String fileName){
+    public ResponseEntity<?> getFile(@RequestParam String fileName){
         return s3Service.downloadFile(fileName);
     }
 }
