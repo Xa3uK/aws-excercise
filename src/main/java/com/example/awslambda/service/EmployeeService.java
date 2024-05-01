@@ -29,13 +29,13 @@ import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class DynamoDBService {
+public class EmployeeService {
 
     @Value("${aws.dynamodb.table-name}")
     private String tableName;
     private final String KEY = "id";
     private final DynamoDbClient dynamoDbClient;
-    private final AWSLambda lambda;
+    private final AWSLambda lambdaClient;
 
     public Employee createEmployee(Employee employee) {
         Map<String, AttributeValue> itemValues = new HashMap<>();
@@ -78,7 +78,7 @@ public class DynamoDBService {
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().s()));
 
                 employee.setProfile(attributes);
-                log.info("getDataById: {}", employee);
+                log.info("getEmployeeById: {}", employee);
                 return employee;
             }
         } catch (DynamoDbException e) {
@@ -108,7 +108,7 @@ public class DynamoDBService {
                 employeeList.add(employee);
             }
             employeeList.sort(Comparator.comparing(Employee::getId));
-            log.info("getAllData: {}", employeeList);
+            log.info("getAllEmployee: {}", employeeList);
             return employeeList;
 
         } catch (DynamoDbException e) {
@@ -122,7 +122,7 @@ public class DynamoDBService {
         InvokeRequest invokeRequest = new InvokeRequest();
         invokeRequest.setFunctionName("GetEmployeeIdFromDynamoDb");
 
-        InvokeResult invokeResult = lambda.invoke(invokeRequest);
+        InvokeResult invokeResult = lambdaClient.invoke(invokeRequest);
 
         String payload = new String(invokeResult.getPayload().array(), StandardCharsets.UTF_8);
 

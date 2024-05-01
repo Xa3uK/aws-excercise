@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.example.awslambda.controller.EmployeeController;
 import com.example.awslambda.model.Employee;
-import com.example.awslambda.service.DynamoDBService;
+import com.example.awslambda.service.EmployeeService;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -15,9 +15,9 @@ public class EmployeeControllerTest {
 
     @Test
     public void testGetEmployeeById_WithEmployeeExists() {
-        DynamoDBService dynamoDBService = mock(DynamoDBService.class);
-        when(dynamoDBService.getEmployeeById("1")).thenReturn(new Employee(3L, Map.of("name", "Alberto")));
-        EmployeeController controller = new EmployeeController(dynamoDBService);
+        EmployeeService employeeService = mock(EmployeeService.class);
+        when(employeeService.getEmployeeById("1")).thenReturn(new Employee(3L, Map.of("name", "Alberto")));
+        EmployeeController controller = new EmployeeController(employeeService);
 
         ResponseEntity<Employee> responseEntity = controller.getEmployeeById("1");
 
@@ -27,9 +27,9 @@ public class EmployeeControllerTest {
 
     @Test
     public void testGetEmployeeById_WithEmployeeNotFound() {
-        DynamoDBService dynamoDBService = mock(DynamoDBService.class);
-        when(dynamoDBService.getEmployeeById("2")).thenReturn(null);
-        EmployeeController controller = new EmployeeController(dynamoDBService);
+        EmployeeService employeeService = mock(EmployeeService.class);
+        when(employeeService.getEmployeeById("2")).thenReturn(null);
+        EmployeeController controller = new EmployeeController(employeeService);
 
         ResponseEntity<Employee> responseEntity = controller.getEmployeeById("2");
 
