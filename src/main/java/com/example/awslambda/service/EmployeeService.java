@@ -3,9 +3,12 @@ package com.example.awslambda.service;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.lambda.model.InvokeResult;
+import com.example.awslambda.exception.EmployeeNotFoundException;
 import com.example.awslambda.model.Employee;
+import com.example.awslambda.model.FileResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,15 +19,20 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.ReturnValue;
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
 import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
+import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
 
 @Service
 @Slf4j
@@ -33,6 +41,7 @@ public class EmployeeService {
 
     @Value("${aws.dynamodb.table-name}")
     private String tableName;
+    private final S3Service s3Service;
     private final String KEY = "id";
     private final DynamoDbClient dynamoDbClient;
     private final AWSLambda lambdaClient;
@@ -70,12 +79,12 @@ public class EmployeeService {
         try {
             Map<String, AttributeValue> returnedItem = dynamoDbClient.getItem(getItemRequest).item();
             if (returnedItem.isEmpty()) {
-                log.error("No item found with the key {}", id);
+                throw new EmployeeNotFoundException(id);
             } else {
                 Employee employee = new Employee();
                 employee.setId(Long.parseLong(id));
                 Map<String, String> attributes = returnedItem.entrySet().stream()
-                    .filter(entry -> !entry.getKey().equals("id"))
+                    .filter(entry -> !entry.getKey().equals(KEY))
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().s()));
 
                 employee.setProfile(attributes);
@@ -131,5 +140,44 @@ public class EmployeeService {
         JsonNode jsonNode = objectMapper.readTree(payload);
 
         return jsonNode.get("body").get("next_id").asText();
+    }
+
+    public void addAvatar(MultipartFile file, String id) {
+        Employee employee = getEmployeeById(id);
+        if (employee == null){
+            throw new EmployeeNotFoundException(id);
+        }
+        s3Service.uploadFile(file);
+
+        Map<String, AttributeValue> key = new HashMap<>();
+        key.put(KEY, AttributeValue.builder().n(id).build());
+
+        String updateExpression = "SET avatar = :value";
+
+        Map<String, AttributeValue> expressionAttributeValues = new HashMap<>();
+        expressionAttributeValues.put(":value", AttributeValue.builder().s(file.getOriginalFilename()).build());
+
+        UpdateItemRequest request = UpdateItemRequest.builder()
+            .tableName(tableName)
+            .key(key)
+            .updateExpression(updateExpression)
+            .expressionAttributeValues(expressionAttributeValues)
+            .returnValues(ReturnValue.ALL_NEW)
+            .build();
+
+        dynamoDbClient.updateItem(request);
+        log.info("Avatar for employee '{}' added", id);
+    }
+
+    public FileResponse getEmployeeAvatar(String id) throws IOException {
+        Employee employee = getEmployeeById(id);
+        if (employee == null){
+            throw new EmployeeNotFoundException(id);
+        }
+        String avatarFileName = employee.getProfile().get("avatar");
+        if (avatarFileName == null){
+            throw new BadRequestException("Employee has no avatar yet");
+        }
+        return s3Service.getFileByName(avatarFileName);
     }
 }

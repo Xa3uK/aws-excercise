@@ -5,15 +5,15 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import com.example.awslambda.model.FileResponse;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,32 +35,33 @@ public class S3Service {
         s3Client.putObject(putObjectRequest);
     }
 
-    @SneakyThrows
-    public ResponseEntity<?> downloadFile(String fileName) {
+    public FileResponse getFileByName(String fileName) throws IOException {
+        S3Object s3Object;
         try {
-            S3Object s3Object = s3Client.getObject(bucketName, fileName);
-            byte[] content = s3Object.getObjectContent().readAllBytes();
-
-            MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
-            String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
-            if ("jpg".equalsIgnoreCase(fileExtension)) {
-                mediaType = MediaType.IMAGE_JPEG;
-            } else if ("txt".equalsIgnoreCase(fileExtension)) {
-                mediaType = MediaType.TEXT_PLAIN;
-            }
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(mediaType);
-            headers.setContentDispositionFormData(fileName, fileName);
-
-            return new ResponseEntity<>(content, headers, HttpStatus.OK);
+            s3Object = s3Client.getObject(bucketName, fileName);
         } catch (AmazonS3Exception e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("File '%s' not found", fileName));
+                throw new FileNotFoundException("File '%s' not found".formatted(fileName));
             } else {
-                e.printStackTrace();
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                throw e;
             }
         }
+
+        byte[] content = s3Object.getObjectContent().readAllBytes();
+
+        MediaType mediaType;
+        String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
+        if ("jpg".equalsIgnoreCase(fileExtension) || "jpeg".equalsIgnoreCase(fileExtension)) {
+            mediaType = MediaType.IMAGE_JPEG;
+        } else if ("txt".equalsIgnoreCase(fileExtension)) {
+            mediaType = MediaType.TEXT_PLAIN;
+        } else if ("png".equalsIgnoreCase(fileExtension)){
+            mediaType = MediaType.IMAGE_PNG;
+        } else {
+            throw new UnsupportedOperationException("MediaType not supported");
+        }
+
+        return new FileResponse(content, mediaType);
     }
 }
 
