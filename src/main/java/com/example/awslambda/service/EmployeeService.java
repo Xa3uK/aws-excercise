@@ -52,6 +52,7 @@ public class EmployeeService {
 
         dynamoDbClient.putItem(request);
         employee.setId(Long.parseLong(employeeId));
+        log.info("Employee created: {}", employee);
         return employee;
     }
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import software.amazon.awssdk.http.HttpStatusCode;
 
 @RequiredArgsConstructor
 @RestController
@@ -22,9 +23,7 @@ public class EmployeeController {
 
     @PostMapping
     public ResponseEntity<Employee> createData(@RequestBody Employee employee) {
-
-        employee.getProfile().forEach((key, value) -> log.info("Key: {}, value: {}", key, value));
-      return ResponseEntity.ok(employeeService.createEmployee(employee));
+      return ResponseEntity.status(HttpStatusCode.CREATED).body(employeeService.createEmployee(employee));
     }
 
     @GetMapping("{id}")
@@ -39,8 +38,7 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public List<Employee> getAllEmployee(){
-        return employeeService.getAllEmployee();
+    public ResponseEntity<List<Employee>> getAllEmployee(){
+        return ResponseEntity.ok(employeeService.getAllEmployee());
     }
-
 }
