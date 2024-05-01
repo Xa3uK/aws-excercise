@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.http.HttpStatusCode;
 
-@RequiredArgsConstructor
-@RestController
-@RequestMapping("/employee")
 @Slf4j
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/employee")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -38,12 +38,7 @@ public class EmployeeController {
 
     @GetMapping("{id}")
     public ResponseEntity<?> getEmployeeById(@PathVariable String id) {
-        try {
-            Employee employee = employeeService.getEmployeeById(id);
-            return ResponseEntity.ok(employee);
-        } catch (EmployeeNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
     @GetMapping
@@ -51,31 +46,17 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getAllEmployee());
     }
 
-    @PostMapping("/{id}/avatar")
-    public ResponseEntity<?> addAvatar(@RequestParam("file") MultipartFile file, @PathVariable String id) {
-        try {
-            employeeService.addAvatar(file, id);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } catch (EmployeeNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+    @PostMapping("/{employeeId}/avatar")
+    public ResponseEntity<?> addAvatar(@RequestParam("file") MultipartFile file, @PathVariable String employeeId) {
+        employeeService.addAvatar(file, employeeId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/{id}/avatar")
-    public ResponseEntity<?> getAvatar(@PathVariable String id) {
-        try {
-            FileResponse fileResponse = employeeService.getEmployeeAvatar(id);
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.setContentType(fileResponse.getMediaType());
-            return new ResponseEntity<>(fileResponse.getContent(), httpHeaders, HttpStatus.OK);
-        } catch (FileNotFoundException | EmployeeNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+    @GetMapping("/{employeeId}/avatar")
+    public ResponseEntity<?> getAvatar(@PathVariable String employeeId) throws IOException {
+        FileResponse fileResponse = employeeService.getEmployeeAvatar(employeeId);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(fileResponse.getMediaType());
+        return new ResponseEntity<>(fileResponse.getContent(), httpHeaders, HttpStatus.OK);
     }
 }
