@@ -130,7 +130,8 @@ public class EmployeeService {
     @SneakyThrows
     private String generateEmployeeId() {
         InvokeRequest invokeRequest = new InvokeRequest();
-        invokeRequest.setFunctionName("GetEmployeeIdFromDynamoDb");
+//        invokeRequest.setFunctionName("GetEmployeeIdFromDynamoDb");
+        invokeRequest.setFunctionName("IdGeneratorLambda");
 
         InvokeResult invokeResult = lambdaClient.invoke(invokeRequest);
 

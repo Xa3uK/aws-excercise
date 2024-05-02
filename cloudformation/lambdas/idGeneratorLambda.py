@@ -2,7 +2,7 @@ import boto3
 
 def lambda_handler(event, context):
     dynamodb = boto3.client('dynamodb')
-    table_name = 'employees2'
+    table_name = 'employees'
 
     try:
         response = dynamodb.scan(TableName=table_name)
