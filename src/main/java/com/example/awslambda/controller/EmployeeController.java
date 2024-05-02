@@ -26,7 +26,7 @@ import software.amazon.awssdk.http.HttpStatusCode;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/employee")
+@RequestMapping("/employees")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -46,13 +46,13 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getAllEmployee());
     }
 
-    @PostMapping("/{employeeId}/avatar")
+    @PostMapping("/{employeeId}/avatars")
     public ResponseEntity<?> addAvatar(@RequestParam("file") MultipartFile file, @PathVariable String employeeId) {
         employeeService.addAvatar(file, employeeId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/{employeeId}/avatar")
+    @GetMapping("/{employeeId}/avatars")
     public ResponseEntity<?> getAvatar(@PathVariable String employeeId) throws IOException {
         FileResponse fileResponse = employeeService.getEmployeeAvatar(employeeId);
         HttpHeaders httpHeaders = new HttpHeaders();

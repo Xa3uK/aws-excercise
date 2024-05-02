@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/file")
+@RequestMapping("/files")
 public class FileController {
 
     private final S3Service s3Service;
