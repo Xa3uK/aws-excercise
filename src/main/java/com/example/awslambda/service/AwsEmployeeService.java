@@ -3,6 +3,7 @@ package com.example.awslambda.service;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.lambda.model.InvokeResult;
+import com.example.awslambda.api.EmployeeApi;
 import com.example.awslambda.exception.EmployeeNotFoundException;
 import com.example.awslambda.model.Employee;
 import com.example.awslambda.model.FileResponse;
@@ -21,7 +22,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -37,7 +37,7 @@ import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class EmployeeService {
+public class AwsEmployeeService implements EmployeeApi {
 
     @Value("${aws.dynamodb.table-name}")
     private String tableName;
@@ -126,11 +126,9 @@ public class EmployeeService {
         }
         return null;
     }
-
     @SneakyThrows
     private String generateEmployeeId() {
         InvokeRequest invokeRequest = new InvokeRequest();
-//        invokeRequest.setFunctionName("GetEmployeeIdFromDynamoDb");
         invokeRequest.setFunctionName("IdGeneratorLambda");
 
         InvokeResult invokeResult = lambdaClient.invoke(invokeRequest);
@@ -143,6 +141,7 @@ public class EmployeeService {
         return jsonNode.get("body").get("next_id").asText();
     }
 
+    @Override
     public void addAvatar(MultipartFile file, String id) {
         Employee employee = getEmployeeById(id);
         if (employee == null){
@@ -170,6 +169,7 @@ public class EmployeeService {
         log.info("Avatar for employee '{}' added", id);
     }
 
+    @Override
     public FileResponse getEmployeeAvatar(String id) throws IOException {
         Employee employee = getEmployeeById(id);
         if (employee == null){

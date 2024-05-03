@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.example.awslambda.controller.EmployeeController;
 import com.example.awslambda.model.Employee;
-import com.example.awslambda.service.EmployeeService;
+import com.example.awslambda.service.AwsEmployeeService;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -16,10 +16,10 @@ public class EmployeeControllerTest {
 
     @Test
     public void testGetEmployeeById_WithEmployeeExists() {
-        EmployeeService employeeService = mock(EmployeeService.class);
+        AwsEmployeeService awsEmployeeService = mock(AwsEmployeeService.class);
         Employee employee = new Employee(3L, Map.of("David", "Perez"));
-        when(employeeService.getEmployeeById("1")).thenReturn(employee);
-        EmployeeController controller = new EmployeeController(employeeService);
+        when(awsEmployeeService.getEmployeeById("1")).thenReturn(employee);
+        EmployeeController controller = new EmployeeController(awsEmployeeService);
 
         ResponseEntity<?> responseEntity = controller.getEmployeeById("1");
 
